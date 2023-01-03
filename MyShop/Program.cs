@@ -1,9 +1,13 @@
+using Microsoft.EntityFrameworkCore;
+using MyShop.ApplicationCore.Entities;
 using MyShop.Configuration;
+using MyShop.Infrastructure.Data;
 using MyShop.Interfaces;
-using MyShop.Models;
 using MyShop.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+MyShop.Infrastructure.Dependencies.ConfigureServices(builder.Configuration, builder.Services);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -16,6 +20,24 @@ builder.Services.AddScoped<ICatalogItemViewModelService, CatalogItemViewModelSer
 var app = builder.Build();
 
 app.Logger.LogInformation("App created...");
+app.Logger.LogInformation("Database migration running...");
+using(var scope = app.Services.CreateScope())
+{
+    var scopedProvider = scope.ServiceProvider;
+    try
+    {
+        var catalogContext = scopedProvider.GetRequiredService<CatalogContext>();
+        if (catalogContext.Database.IsSqlServer())
+        {
+            catalogContext.Database.Migrate();
+        }
+        //await CatalogContextSeed.
+    }
+    catch(Exception ex) 
+    {
+        app.Logger.LogError(ex, "An error occurred adding migration to Database");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
