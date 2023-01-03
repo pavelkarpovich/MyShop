@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MyShop.ApplicationCore.Entities;
+using MyShop.ApplicationCore.Interfaces;
 using MyShop.Configuration;
 using MyShop.Infrastructure.Data;
 using MyShop.Interfaces;
@@ -14,7 +15,7 @@ builder.Services.AddControllersWithViews();
 
 // IoC
 builder.Services.AddCoreServices();
-builder.Services.AddScoped(typeof(IRepository<CatalogItem>), typeof(LocalCatalogItemRepository));
+builder.Services.AddScoped(typeof(IRepository<CatalogItem>), typeof(EfRepository<CatalogItem>));
 builder.Services.AddScoped<ICatalogItemViewModelService, CatalogItemViewModelService>();
 
 var app = builder.Build();
@@ -31,7 +32,7 @@ using(var scope = app.Services.CreateScope())
         {
             catalogContext.Database.Migrate();
         }
-        //await CatalogContextSeed.
+        await CatalogContextSeed.SeedAsync(catalogContext, app.Logger);
     }
     catch(Exception ex) 
     {

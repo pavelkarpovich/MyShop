@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MyShop.ApplicationCore.Entities;
+using MyShop.ApplicationCore.Interfaces;
 using MyShop.Interfaces;
 using MyShop.Models;
 using MyShop.Services;
@@ -17,15 +18,9 @@ namespace MyShop.Controllers
             _catalogItemViewModelService = catalogItemViewModelService;
             _catalogRepository = catalogRepository;
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var catalogItemsViewModel = _catalogRepository.GetAll().Select(x => new CatalogItemViewModel
-            {
-                Id = x.Id,
-                Name = x.Name,
-                PictureUrl = x.PictureUrl,
-                Price = x.Price
-            }).ToList();
+            var catalogItemsViewModel = await _catalogItemViewModelService.GetCatalogItems();
 
             return View(catalogItemsViewModel);
         }
